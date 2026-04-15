@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alex.devCode | FinTech Cyberpunk</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    
+    <style>
+        :root {
+            --neon-yellow: #ffc107;
+            --neon-blue: #00f2ff;
+            --dark-bg: #050505;
+            --card-bg: #111111;
+        }
+
+        body {
+            background-color: var(--dark-bg);
+            color: #fff;
+            font-family: 'Rajdhani', sans-serif;
+        }
+
+        /* Estética Cyberpunk */
+        .navbar {
+            background: #000 !important;
+            border-bottom: 2px solid var(--neon-yellow);
+            box-shadow: 0 0 15px rgba(255, 193, 7, 0.3);
+        }
+
+        .profile-img {
+            width: 45px; height: 45px;
+            border: 2px solid var(--neon-yellow);
+            border-radius: 50%;
+            cursor: pointer;
+            object-fit: cover;
+        }
+
+        .neon-card {
+            background: var(--card-bg);
+            border: 1px solid #333;
+            border-left: 5px solid var(--neon-yellow);
+            transition: all 0.3s ease;
+        }
+
+        .neon-card:hover {
+            box-shadow: 0 0 20px rgba(255, 193, 7, 0.4);
+            transform: translateY(-5px);
+            border-color: var(--neon-yellow);
+        }
+
+        .rate-value {
+            font-family: 'Orbitron', sans-serif;
+            color: var(--neon-yellow);
+            font-size: 1.5rem;
+            text-shadow: 0 0 5px rgba(255, 193, 7, 0.5);
+        }
+
+        .calc-master {
+            background: linear-gradient(145deg, #0a0a0a, #1a1a1a);
+            border: 2px solid var(--neon-blue);
+            box-shadow: 0 0 25px rgba(0, 242, 255, 0.15);
+        }
+
+        .modal-content {
+            background: #0a0a0a;
+            border: 2px solid var(--neon-yellow);
+            box-shadow: 0 0 30px rgba(255, 193, 7, 0.2);
+        }
+
+        .tech-badge {
+            border: 1px solid var(--neon-yellow);
+            color: var(--neon-yellow);
+            padding: 4px 12px;
+            margin: 4px;
+            font-size: 0.8rem;
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar navbar-expand-lg sticky-top mb-4">
+        <div class="container">
+            <a class="navbar-brand fw-bold text-white fs-3" href="#">
+                ALEX.<span class="text-warning">DEVCODE</span>
+            </a>
+            <div class="d-flex align-items-center">
+                <img src="https://ui-avatars.com/api/?name=Alex+Dev&background=ffc107&color=000" class="profile-img" data-bs-toggle="modal" data-bs-target="#profileModal">
+            </div>
+        </div>
+    </nav>
+
+    <div class="container pb-5">
+        <div class="row mb-4">
+            <div class="col-md-8">
+                <h1 class="display-5 fw-bold text-uppercase">Financial <span class="text-warning">Terminal</span></h1>
+                <p class="text-secondary" id="lastUpdate">Sincronizando con ExchangeRate-API...</p>
+            </div>
+        </div>
+
+        <div class="row mb-5">
+            <div class="col-12">
+                <div class="calc-master p-4 rounded-3">
+                    <h4 class="text-info mb-4 text-uppercase"><i class="bi bi-calculator"></i> Conversor Maestro</h4>
+                    <div class="row g-3">
+                        <div class="col-md-5">
+                            <label class="small text-info">PESO DOMINICANO (DOP)</label>
+                            <input type="number" id="inputDOP" class="form-control bg-dark text-white border-info fs-4" placeholder="Ej: 1000">
+                        </div>
+                        <div class="col-md-2 d-flex align-items-end justify-content-center pb-2">
+                            <i class="bi bi-arrow-left-right fs-2 text-info"></i>
+                        </div>
+                        <div class="col-md-5">
+                            <label class="small text-info">RESULTADO EN DÓLARES (USD)</label>
+                            <div id="resultUSD" class="form-control bg-dark text-warning border-info fs-4 fw-bold">0.00 USD</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mb-5">
+            <div class="col-12">
+                <div class="p-4 rounded-3" style="background: #111; border: 1px solid #333;">
+                    <h5 class="text-uppercase mb-4">Proyección 6 Meses: USD/DOP</h5>
+                    <div id="chart"></div>
+                </div>
+            </div>
+        </div>
+
+        <h5 class="text-uppercase mb-4 border-bottom border-warning d-inline-block pb-1">Tasas de Cambio vs DOP</h5>
+        <div id="currencyGrid" class="row g-4">
+            </div>
+    </div>
+
+    <div class="modal fade" id="profileModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-body p-5 text-center">
+                    <img src="https://ui-avatars.com/api/?name=Alex+Dev&background=ffc107&color=000&size=128" class="rounded-circle mb-3 border border-warning border-3">
+                    <h3 class="fw-bold text-warning">ALEX.DEVCODE</h3>
+                    <p class="text-secondary mb-4">Systems Engineering Student | Universidad O&M</p>
+                    
+                    <div class="mb-4">
+                        <span class="tech-badge">.NET MAUI</span>
+                        <span class="tech-badge">C#</span>
+                        <span class="tech-badge">SQL SERVER</span>
+                        <span class="tech-badge">NODE.JS</span>
+                    </div>
+
+                    <div class="d-flex justify-content-center gap-4 fs-2">
+                        <a href="#" class="text-warning"><i class="bi bi-github"></i></a>
+                        <a href="#" class="text-warning"><i class="bi bi-youtube"></i></a>
+                        <a href="#" class="text-warning"><i class="bi bi-linkedin"></i></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+
+    <script>
+        const API_KEY = 'f270e4613851b23735a785fb';
+        const URL_API = `https://v6.exchangerate-api.com/v6/${API_KEY}/latest/DOP`;
+        
+        const MONEDAS = [
+            { code: 'USD', name: 'Dólar USA', flag: '🇺🇸' },
+            { code: 'EUR', name: 'Euro', flag: '🇪🇺' },
+            { code: 'GBP', name: 'Libra Esterlina', flag: '🇬🇧' },
+            { code: 'CAD', name: 'Dólar Canadiense', flag: '🇨🇦' },
+            { code: 'MXN', name: 'Peso Mexicano', flag: '🇲🇽' },
+            { code: 'BRL', name: 'Real Brasileño', flag: '🇧🇷' },
+            { code: 'JPY', name: 'Yen Japonés', flag: '🇯🇵' },
+            { code: 'CHF', name: 'Franco Suizo', flag: '🇨🇭' },
+            { code: 'COP', name: 'Peso Colombiano', flag: '🇨🇴' },
+            { code: 'CLP', name: 'Peso Chileno', flag: '🇨🇱' },
+            { code: 'ARS', name: 'Peso Argentino', flag: '🇦🇷' },
+            { code: 'CNY', name: 'Yuan Chino', flag: '🇨🇳' }
+        ];
+
+        let rates = {};
+
+        async function getData() {
+            try {
+                const res = await fetch(URL_API);
+                const data = await res.json();
+                
+                if(data.result === "success") {
+                    rates = data.conversion_rates;
+                    document.getElementById('lastUpdate').innerText = `Sync: ${data.time_last_update_utc.slice(0,16)} UTC`;
+                    renderUI();
+                    initCalc();
+                }
+            } catch (e) {
+                console.error("Error de conexión");
+            }
+        }
+
+        function renderUI() {
+            const grid = document.getElementById('currencyGrid');
+            grid.innerHTML = MONEDAS.map(m => {
+                // Cálculo para saber cuántos DOP es 1 unidad de la otra moneda
+                const valorEnDop = (1 / rates[m.code]).toFixed(2);
+                return `
+                    <div class="col-md-4 col-lg-3">
+                        <div class="neon-card p-3 rounded-2">
+                            <div class="fs-2 mb-2">${m.flag}</div>
+                            <div class="fw-bold">${m.code}</div>
+                            <div class="text-secondary small mb-2">${m.name}</div>
+                            <div class="rate-value">${valorEnDop} <small style="font-size: 10px; color:#666">DOP</small></div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function initCalc() {
+            const input = document.getElementById('inputDOP');
+            const output = document.getElementById('resultUSD');
+            input.addEventListener('input', () => {
+                const val = input.value;
+                if(val && rates['USD']) {
+                    const res = (val * rates['USD']).toFixed(2);
+                    output.innerText = `${res} USD`;
+                } else {
+                    output.innerText = '0.00 USD';
+                }
+            });
+        }
+
+        // Gráfico con ApexCharts
+        const chartOptions = {
+            series: [{
+                name: 'Tasa Cambio USD/DOP',
+                data: [56.10, 56.45, 57.20, 58.30, 59.10, 59.25]
+            }],
+            chart: { height: 300, type: 'area', toolbar: {show: false}, background: 'transparent' },
+            colors: ['#ffc107'],
+            dataLabels: { enabled: false },
+            stroke: { curve: 'smooth', width: 3 },
+            fill: { type: 'gradient', gradient: { opacityFrom: 0.6, opacityTo: 0 } },
+            xaxis: {
+                categories: ['Nov', 'Dic', 'Ene', 'Feb', 'Mar', 'Abr'],
+                labels: { style: { colors: '#666' } }
+            },
+            yaxis: { labels: { style: { colors: '#666' } } },
+            grid: { borderColor: '#222' },
+            theme: { mode: 'dark' }
+        };
+
+        new ApexCharts(document.querySelector("#chart"), chartOptions).render();
+
+        // Iniciar
+        getData();
+        
+    </script>
+</body>
+</html>
